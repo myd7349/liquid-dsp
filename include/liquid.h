@@ -164,7 +164,11 @@ const char *        liquid_error_info(liquid_error_code _code);
  */
 #if LIQUID_USE_COMPLEX_H==1
 #   include <complex.h>
-#   define LIQUID_DEFINE_COMPLEX(R,C) typedef R _Complex C
+#   if defined _MSC_VER
+#      define LIQUID_DEFINE_COMPLEX(R,C) typedef _C_##R##_complex C
+#   else
+#      define LIQUID_DEFINE_COMPLEX(R,C) typedef R _Complex C
+#   endif
 #elif defined _GLIBCXX_COMPLEX || defined _LIBCPP_COMPLEX
 #   define LIQUID_DEFINE_COMPLEX(R,C) typedef std::complex<R> C
 #else

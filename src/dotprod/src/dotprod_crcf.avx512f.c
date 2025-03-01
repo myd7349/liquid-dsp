@@ -36,33 +36,37 @@
 
 // forward declaration of internal methods
 int dotprod_crcf_execute_avx512f(dotprod_crcf    _q,
-                             float complex * _x,
-                             float complex * _y);
+                             liquid_float_complex * _x,
+                             liquid_float_complex * _y);
 int dotprod_crcf_execute_avx512f4(dotprod_crcf    _q,
-                              float complex * _x,
-                              float complex * _y);
+                              liquid_float_complex * _x,
+                              liquid_float_complex * _y);
 
 // basic dot product (ordinal calculation)
 int dotprod_crcf_run(float *         _h,
-                     float complex * _x,
+                     liquid_float_complex * _x,
                      unsigned int    _n,
-                     float complex * _y)
+                     liquid_float_complex * _y)
 {
-    float complex r = 0;
+    liquid_float_complex r = _FCOMPLEX_(0, 0);
     unsigned int i;
-    for (i=0; i<_n; i++)
+    for (i = 0; i < _n; i++)
+#ifdef _MSC_VER
+        r = _FCmulcr(_x[i], _h[i]);
+#else
         r += _h[i] * _x[i];
+#endif
     *_y = r;
     return LIQUID_OK;
 }
 
 // basic dot product (ordinal calculation) with loop unrolled
 int dotprod_crcf_run4(float *         _h,
-                      float complex * _x,
+                      liquid_float_complex * _x,
                       unsigned int    _n,
-                      float complex * _y)
+                      liquid_float_complex * _y)
 {
-    float complex r = 0;
+    liquid_float_complex r = 0;
 
     // t = 4*(floor(_n/4))
     unsigned int t=(_n>>2)<<2; 
@@ -190,8 +194,8 @@ int dotprod_crcf_print(dotprod_crcf _q)
 
 // 
 int dotprod_crcf_execute(dotprod_crcf    _q,
-                         float complex * _x,
-                         float complex * _y)
+                         liquid_float_complex * _x,
+                         liquid_float_complex * _y)
 {
     // switch based on size
     if (_q->n < 128) {
@@ -202,8 +206,8 @@ int dotprod_crcf_execute(dotprod_crcf    _q,
 
 // use AVX512-F extensions
 int dotprod_crcf_execute_avx512f(dotprod_crcf    _q,
-                             float complex * _x,
-                             float complex * _y)
+                             liquid_float_complex * _x,
+                             liquid_float_complex * _y)
 {
     // type cast input as floating point array
     float * x = (float*) _x;
@@ -256,8 +260,8 @@ int dotprod_crcf_execute_avx512f(dotprod_crcf    _q,
 
 // use AVX512-F extensions
 int dotprod_crcf_execute_avx512f4(dotprod_crcf    _q,
-                              float complex * _x,
-                              float complex * _y)
+                              liquid_float_complex * _x,
+                              liquid_float_complex * _y)
 {
     // type cast input as floating point array
     float * x = (float*) _x;

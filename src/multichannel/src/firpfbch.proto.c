@@ -103,7 +103,11 @@ FIRPFBCH() FIRPFBCH(_create)(int          _type,
     // generate bank of sub-samped filters
     unsigned int n;
     unsigned int h_sub_len = q->p;
+#ifdef _MSC_VER
+    TC *h_sub = malloc(h_sub_len * sizeof(TC));
+#else
     TC h_sub[h_sub_len];
+#endif
     for (i=0; i<q->num_channels; i++) {
         // sub-sample prototype filter, loading coefficients in reverse order
         for (n=0; n<h_sub_len; n++) {
@@ -127,6 +131,10 @@ FIRPFBCH() FIRPFBCH(_create)(int          _type,
 
     // reset filterbank object
     FIRPFBCH(_reset)(q);
+
+#ifdef _MSC_VER
+    free(h_sub);
+#endif
 
     // return filterbank object
     return q;
@@ -155,19 +163,36 @@ FIRPFBCH() FIRPFBCH(_create_kaiser)(int          _type,
 
     // design filter
     unsigned int h_len = 2*_M*_m + 1;
+#ifdef _MSC_VER
+    float* h = malloc(h_len * sizeof(float));
+#else
     float h[h_len];
+#endif
     float fc = 0.5f / (float)_M; // TODO : check this value
     liquid_firdes_kaiser(h_len, fc, _as, 0.0f, h);
 
     // copy coefficients to type-specfic array
+#ifdef _MSC_VER
+    TC* hc = malloc(h_len * sizeof(TC));
+#else
     TC hc[h_len];
+#endif
     unsigned int i;
-    for (i=0; i<h_len; i++)
+    for (i = 0; i < h_len; i++)
+#ifdef _MSC_VER
+        hc[i] = _FCOMPLEX_(h[i], 0);
+#else
         hc[i] = h[i];
+#endif
 
     // create filterbank object
     unsigned int p = 2*_m;
     FIRPFBCH() q = FIRPFBCH(_create)(_type, _M, p, hc);
+
+#ifdef _MSC_VER
+    free(h);
+    free(hc);
+#endif
 
     // return filterbank object
     return q;
